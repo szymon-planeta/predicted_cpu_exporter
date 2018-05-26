@@ -53,6 +53,7 @@ func NewExporter(url string) *Exporter {
 			Namespace: namespace,
 			Name: "cpu_usage",
 			Help: "Predicted CPU usage in milicores",
+			ConstLabels: prometheus.Labels{"namespace":"default", "service":"podinfo"},
 		}),
 	}
 }
@@ -77,7 +78,7 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 		case val.Type() == model.ValVector:
 			vectorVal := val.(model.Vector)
 			if len(vectorVal) != 1 { return fmt.Errorf("Received vector with size different than 1") }
-			e.predictedCpu.Set(float64(vectorVal[0].Value))
+			e.predictedCpu.Set(float64(vectorVal[0].Value) + 100)
 	}
 
 	e.predictedCpu.Collect(ch)
