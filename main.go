@@ -17,7 +17,7 @@ import (
 
 const (
 	metricsEndpoint = "/metrics"
-	namespace = "kubernetes"
+	namespace = "prediction"
 )
 
 var (
@@ -51,7 +51,7 @@ func NewExporter(url string) *Exporter {
 			nil),
 		predictedCpu: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: namespace,
-			Name: "predicted_cpu_usage",
+			Name: "cpu_usage",
 			Help: "Predicted CPU usage in milicores",
 		}),
 	}
@@ -65,7 +65,7 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	val, err := e.clientAPI.Query(ctx, "go_goroutines", time.Now())
+	val, err := e.clientAPI.Query(ctx, "sum(rate(container_cpu_usage_seconds_total{namespace=\"default\",pod_name=~\"podinfo.*\"}[1m]))*1000", time.Now())
 
 	if err != nil {
 		ch <- prometheus.MustNewConstMetric(e.up, prometheus.GaugeValue, 0)
