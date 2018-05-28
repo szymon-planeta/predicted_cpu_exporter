@@ -89,5 +89,4 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		log.Errorf("Error scraping apache: %s", err)
 	}
 	return
-
-
+}
