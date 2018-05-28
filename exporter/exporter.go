@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
