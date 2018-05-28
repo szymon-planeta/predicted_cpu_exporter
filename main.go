@@ -24,8 +24,8 @@ var (
 func main() {
 	flag.Parse()
 
-	exporter := NewExporter(*promURL)
-	prometheus.MustRegister(exporter)
+	exp := exporter.NewExporter(*promURL)
+	prometheus.MustRegister(exp)
 
 	log.Infoln("Starting predicted_cpu_exporter")
 	log.Infof("Starting server: %s", *addr)
