@@ -12,7 +12,6 @@ import (
 
 const (
 	metricsEndpoint = "/metrics"
-	namespace = "prediction"
 )
 
 var (
