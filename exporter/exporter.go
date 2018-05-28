@@ -11,6 +11,8 @@ import (
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
+
+	"github.com/szymon-planeta/predicted_cpu_exporter/algorithm"
 )
 
 const (
@@ -20,12 +22,13 @@ const (
 type Exporter struct {
 	mutex		sync.Mutex
 	clientAPI	v1.API
+	alg		algorithm.Algorithm
 
 	up		*prometheus.Desc
 	predictedCpu	prometheus.Gauge
 }
 
-func NewExporter(url string) *Exporter {
+func NewExporter(url string, alg algorithm) *Exporter {
 	client, err := api.NewClient(api.Config{Address:url})
 	cliAPI := v1.NewAPI(client)
 
@@ -35,6 +38,7 @@ func NewExporter(url string) *Exporter {
 
 	return &Exporter {
 		clientAPI: cliAPI,
+		alg: algorithm.NewArma(),
 		up: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "", "up"),
 			"Could the prometheus be reached",
@@ -69,7 +73,8 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 		case val.Type() == model.ValVector:
 			vectorVal := val.(model.Vector)
 			if len(vectorVal) != 1 { return fmt.Errorf("Received vector with size different than 1") }
-			e.predictedCpu.Set(float64(vectorVal[0].Value) + 100)
+			e.alg.StoreData(float64(vectorVal[0].Value))
+			e.predictedCpu.Set(e.alg.Predict())
 	}
 
 	e.predictedCpu.Collect(ch)
@@ -84,4 +89,5 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		log.Errorf("Error scraping apache: %s", err)
 	}
 	return
-}
+
+

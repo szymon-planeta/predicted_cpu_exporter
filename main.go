@@ -8,6 +8,7 @@ import (
 	"github.com/prometheus/common/log"
 
 	"github.com/szymon-planeta/predicted_cpu_exporter/exporter"
+	"github.com/szymon-planeta/predicted_cpu_exporter/algorithm"
 )
 
 const (
