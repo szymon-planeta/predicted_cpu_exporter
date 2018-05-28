@@ -25,7 +25,7 @@ var (
 func main() {
 	flag.Parse()
 
-	exp := exporter.NewExporter(*promURL)
+	exp := exporter.NewExporter(*promURL, algorithm.NewArma())
 	prometheus.MustRegister(exp)
 
 	log.Infoln("Starting predicted_cpu_exporter")
