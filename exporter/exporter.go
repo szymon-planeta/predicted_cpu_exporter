@@ -28,7 +28,7 @@ type Exporter struct {
 	predictedCpu	prometheus.Gauge
 }
 
-func NewExporter(url string, alg algorithm) *Exporter {
+func NewExporter(url string, alg algorithm.Algorithm) *Exporter {
 	client, err := api.NewClient(api.Config{Address:url})
 	cliAPI := v1.NewAPI(client)
 
