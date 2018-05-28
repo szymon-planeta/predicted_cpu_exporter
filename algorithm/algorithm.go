@@ -17,6 +17,6 @@ func (a *Arma) Predict() float64 {
 	return 100
 }
 
-func NewArma() Arma  {
+func NewArma() *Arma  {
 	return &Arma {}
 }
