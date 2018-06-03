@@ -18,7 +18,7 @@ const (
 var (
 	addr		= flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
 	promURL		= flag.String("prometheus-url", "http://localhost:9090", "URL to prometheus")
-	algorithm	= flag.String("algorithm", "ARMA", "Prediction algorithm, possible values: ARMA, DES")
+	mod	e	= flag.String("mode", "ARMA", "Prediction algorithm, possible values: ARMA, DES")
 )
 
 
@@ -29,9 +29,9 @@ func main() {
 	var alg algorithm.Algorithm
 
 	switch {
-		case *algorithm == "ARMA":
+		case *mode == "ARMA":
 			alg = algorithm.NewArma()
-		case *algorithm == "DES":
+		case *mode == "DES":
 			alg = algorithm.NewDES()
 	}
 
