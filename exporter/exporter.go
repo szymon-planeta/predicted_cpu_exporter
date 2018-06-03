@@ -24,8 +24,9 @@ type Exporter struct {
 	clientAPI	v1.API
 	alg		algorithm.Algorithm
 
-	up		*prometheus.Desc
-	predictedCpu	prometheus.Gauge
+	up			*prometheus.Desc
+	predictedCpu		prometheus.Gauge
+	predictedCpuPercent	prometheus.Gauge
 }
 
 func NewExporter(url string, alg algorithm.Algorithm) *Exporter {
@@ -47,7 +48,13 @@ func NewExporter(url string, alg algorithm.Algorithm) *Exporter {
 		predictedCpu: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name: "cpu_usage",
-			Help: "Predicted CPU usage in milicores",
+			Help: "Predicted CPU usage as milicores",
+			ConstLabels: prometheus.Labels{"namespace":"default", "service":"podinfo"},
+		}),
+		predictedCpuPercent: prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: namespace,
+			Name: "cpu_usage_percent",
+			Help: "Predicted CPU usage as percentage of service requests",
 			ConstLabels: prometheus.Labels{"namespace":"default", "service":"podinfo"},
 		}),
 	}
@@ -56,28 +63,42 @@ func NewExporter(url string, alg algorithm.Algorithm) *Exporter {
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- e.up
 	e.predictedCpu.Describe(ch)
+	e.predictedCpuPercent.Describe(ch)
 }
 
 func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	val, err := e.clientAPI.Query(ctx, "sum(rate(container_cpu_usage_seconds_total{namespace=\"default\",pod_name=~\"podinfo.*\"}[1m]))*1000", time.Now())
+	cpu, err := e.clientAPI.Query(ctx, "sum(rate(container_cpu_usage_seconds_total{namespace=\"default\",pod_name=~\"podinfo.*\"}[1m]))*1000", time.Now())
+	requests, err2 := e.clientAPI.Query(ctx, "sum(kube_pod_container_resource_requests_cpu_cores{namespace="default", pod=~"podinfo.*"})*1000", time.Now())
 
-	if err != nil {
+	if err != nil && err2 != nil {
 		ch <- prometheus.MustNewConstMetric(e.up, prometheus.GaugeValue, 0)
 		return fmt.Errorf("Error scraping prometheus: %v", err)
 	}
 	ch <- prometheus.MustNewConstMetric(e.up, prometheus.GaugeValue, 1)
 
+	var predictedCpuMc, predictedCpuPercent float64
+
 	switch {
-		case val.Type() == model.ValVector:
-			vectorVal := val.(model.Vector)
+		case cpu.Type() == model.ValVector:
+			vectorVal := cpu.(model.Vector)
 			if len(vectorVal) != 1 { return fmt.Errorf("Received vector with size different than 1") }
 			e.alg.StoreData(float64(vectorVal[0].Value))
-			e.predictedCpu.Set(e.alg.Predict())
+			predictedCpuMc = e.alg.Predict()
+			e.predictedCpu.Set(predictedCpuMc)
+	}
+
+	switch {
+		case requests.Type() == model.ValVector:
+			vectorVal := requests.(model.Vector)
+			if len(vectorVal) != 1 { return fmt.Errorf("Received vector with size different than 1") }
+			predictedCpuPercent = predictedCpuMc / float64(vectorVal[0].Value)
+			e.predictedCpuPercent.Set(predictedCpuPercent)
 	}
 
 	e.predictedCpu.Collect(ch)
+	e.predictedCpuPercent.Collect(ch)
 
 	return nil
 }
