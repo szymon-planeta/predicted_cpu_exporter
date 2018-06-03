@@ -70,7 +70,7 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	cpu, err := e.clientAPI.Query(ctx, "sum(rate(container_cpu_usage_seconds_total{namespace=\"default\",pod_name=~\"podinfo.*\"}[1m]))*1000", time.Now())
-	requests, err2 := e.clientAPI.Query(ctx, "sum(kube_pod_container_resource_requests_cpu_cores{namespace="default", pod=~"podinfo.*"})*1000", time.Now())
+	requests, err2 := e.clientAPI.Query(ctx, "sum(kube_pod_container_resource_requests_cpu_cores{namespace=\"default\", pod=~\"podinfo.*\"})*1000", time.Now())
 
 	if err != nil && err2 != nil {
 		ch <- prometheus.MustNewConstMetric(e.up, prometheus.GaugeValue, 0)
