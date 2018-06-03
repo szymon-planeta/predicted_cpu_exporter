@@ -32,6 +32,7 @@ type DES struct {
 	alfa float64
 	currentData float64
 	lastPrediction float64
+	initialized bool
 }
 
 func (d *DES) StoreData(n float64) {
@@ -39,13 +40,14 @@ func (d *DES) StoreData(n float64) {
 }
 
 func (d *DES) Predict() float64 {
-	if d.lastPrediction == nil {
+	if !d.initialized {
 		d.lastPrediction = d.currentData
+		d.initialized = true
 	}
 	d.lastPrediction = (2*d.lastPrediction - d.currentData) + ((d.lastPrediction - d.currentData)*d.alfa / (1 - d.alfa))
 	return d.lastPrediction
 }
 
 func NewDES() *DES  {
-	return &DES { alfa: 0.5, currentData: nil, lastPrediction: nil }
+	return &DES { alfa: 0.5, currentData: 0, lastPrediction: 0, initialized: false }
 }
