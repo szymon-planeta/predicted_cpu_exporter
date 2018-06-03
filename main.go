@@ -18,6 +18,7 @@ const (
 var (
 	addr		= flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
 	promURL		= flag.String("prometheus-url", "http://localhost:9090", "URL to prometheus")
+	algorithm	= flag.String("algorithm", "ARMA", "Prediction algorithm, possible values: ARMA, DES")
 )
 
 
@@ -25,7 +26,16 @@ var (
 func main() {
 	flag.Parse()
 
-	exp := exporter.NewExporter(*promURL, algorithm.NewArma())
+	var alg algorithm.Algorithm
+
+	switch {
+		case *algorithm == "ARMA":
+			alg = algorithm.NewArma()
+		case *algorithm == "DES":
+			alg = algorithm.NewDES()
+	}
+
+	exp := exporter.NewExporter(*promURL, alg)
 	prometheus.MustRegister(exp)
 
 	log.Infoln("Starting predicted_cpu_exporter")

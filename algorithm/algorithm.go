@@ -27,3 +27,24 @@ func (a *Arma) Predict() float64 {
 func NewArma() *Arma  {
 	return &Arma {}
 }
+
+type DES struct {
+	alfa float64
+	currentData float64
+	lastPrediction float64
+}
+
+func (d *DES) StoreData(n float64) {
+	d.currentData = n
+}
+
+func (d *DES) Predict() float64 {
+	if d.lastPrediction == nil {
+		d.lastPrediction = d.currentData
+	}
+	d.lastPrediction = (2*d.lastPrediction - d.currentData) + ((d.lastPrediction - d.currentData)*d.alfa / (1 - d.alfa))
+	return d.lastPrediction
+
+func NewDES() *DES  {
+	return &DES { alfa: 0.5, currentData: nil, lastPrediction: nil }
+}
