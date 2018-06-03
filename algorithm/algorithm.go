@@ -18,8 +18,6 @@ func (a *Arma) StoreData(n float64) {
 	}
 }
 
-}
-
 func (a *Arma) Predict() float64 {
 	beta := 0.8
 	gamma := 0.15
