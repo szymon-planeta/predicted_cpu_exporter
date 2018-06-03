@@ -44,6 +44,7 @@ func (d *DES) Predict() float64 {
 	}
 	d.lastPrediction = (2*d.lastPrediction - d.currentData) + ((d.lastPrediction - d.currentData)*d.alfa / (1 - d.alfa))
 	return d.lastPrediction
+}
 
 func NewDES() *DES  {
 	return &DES { alfa: 0.5, currentData: nil, lastPrediction: nil }
