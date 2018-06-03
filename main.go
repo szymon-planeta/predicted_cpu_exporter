@@ -18,7 +18,7 @@ const (
 var (
 	addr		= flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
 	promURL		= flag.String("prometheus-url", "http://localhost:9090", "URL to prometheus")
-	mod	e	= flag.String("mode", "ARMA", "Prediction algorithm, possible values: ARMA, DES")
+	mode		= flag.String("mode", "ARMA", "Prediction algorithm, possible values: ARMA, DES")
 )
 
 
