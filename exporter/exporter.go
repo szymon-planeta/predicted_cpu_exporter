@@ -93,7 +93,7 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 		case requests.Type() == model.ValVector:
 			vectorVal := requests.(model.Vector)
 			if len(vectorVal) != 1 { return fmt.Errorf("Received vector with size different than 1") }
-			predictedCpuPercent = predictedCpuMc / float64(vectorVal[0].Value)
+			predictedCpuPercent = (predictedCpuMc / float64(vectorVal[0].Value)) * 100
 			e.predictedCpuPercent.Set(predictedCpuPercent)
 	}
 
