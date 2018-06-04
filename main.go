@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"net/http"
+	"os"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
@@ -28,11 +29,14 @@ func main() {
 
 	var alg algorithm.Algorithm
 
-	switch {
-		case *mode == "ARMA":
+	switch *mode {
+		case "ARMA":
 			alg = algorithm.NewArma()
-		case *mode == "DES":
+		case "DES":
 			alg = algorithm.NewDES()
+		default:
+			log.Fatalf("Undefined mode: %s", *mode)
+			os.Exit(1)
 	}
 
 	exp := exporter.NewExporter(*promURL, alg)
